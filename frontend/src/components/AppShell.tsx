@@ -19,7 +19,10 @@ function AppShell({ children }: { children: ReactNode }) {
     ? [
         { to: '/discover', label: 'Find a Tutor' },
         ...(user.role === 'TUTOR'
-          ? [{ to: '/tutor/setup', label: 'My Profile' }]
+          ? [
+              { to: '/tutor/setup', label: 'My Profile' },
+              { to: '/tutor/availability', label: 'Availability' },
+            ]
           : []),
       ]
     : []

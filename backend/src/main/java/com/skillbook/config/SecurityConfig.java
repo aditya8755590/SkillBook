@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/skills").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/tutors/profile").authenticated()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/tutors", "/tutors/*").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/tutors/*/availability").permitAll()
                 .anyRequest().authenticated())
             .exceptionHandling(ex -> ex
                 .authenticationEntryPoint((request, response, authException) -> {

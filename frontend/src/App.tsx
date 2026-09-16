@@ -4,6 +4,7 @@ import Register from './pages/Register'
 import Home from './pages/Home'
 import Discover from './pages/Discover'
 import TutorSetup from './pages/TutorSetup'
+import TutorAvailabilityPage from './pages/TutorAvailabilityPage'
 import TutorProfilePage from './pages/TutorProfilePage'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
       <Route path="/discover" element={<Discover />} />
       <Route path="/tutors/:userId" element={<TutorProfilePage />} />
       <Route path="/tutor/setup" element={<TutorSetup />} />
+      <Route path="/tutor/availability" element={<TutorAvailabilityPage />} />
       <Route path="/" element={<Home />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

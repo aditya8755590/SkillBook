@@ -71,6 +71,37 @@ interface TutorProfile extends TutorProfilePayload {
   createdAt?: string
 }
 
+interface AvailabilityRule {
+  id: string
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  timezone: string
+  active: boolean
+}
+
+interface AvailabilityRuleRequest {
+  dayOfWeek: number
+  startTime: string
+  endTime: string
+  timezone: string
+}
+
+interface AvailabilitySlot {
+  id: string
+  startAt: string
+  endAt: string
+  status: 'AVAILABLE' | 'BOOKED'
+  source: 'RULE' | 'ONE_OFF'
+}
+
+interface SlotGenerationResult {
+  generated: number
+  skipped: number
+  startDate: string
+  endDate: string
+}
+
 export type {
   ApiResponse,
   User,
@@ -81,4 +112,8 @@ export type {
   PageData,
   TutorSearchParams,
   TutorProfilePayload,
+  AvailabilityRule,
+  AvailabilityRuleRequest,
+  AvailabilitySlot,
+  SlotGenerationResult,
 }
