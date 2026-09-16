@@ -1,0 +1,32 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+.next/
+
+# Environment - NEVER commit real secrets
+.env
+.env.local
+.env.*.local
+*.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
