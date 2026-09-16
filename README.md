@@ -343,7 +343,7 @@ lsof -iTCP:8080 -sTCP:LISTEN   # kill the listed PID
 | 1     | Project foundation: Spring Boot, PostgreSQL, Flyway, React scaffold | ✅ Done |
 | 2     | Database entities + JPA relationships                               | ✅ Done |
 | 3     | Authentication + JWT + roles                                        | ✅ Done |
-| 4     | Student/Tutor profiles                                              |         |
+| 4     | Student/Tutor profiles                                              | ✅ Done |
 | 5     | Skills + tutor discovery + search                                   |         |
 | 6     | Availability + slot generation                                      |         |
 | 7     | Concurrency-safe booking                                            |         |
