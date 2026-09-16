@@ -344,7 +344,7 @@ lsof -iTCP:8080 -sTCP:LISTEN   # kill the listed PID
 | 2     | Database entities + JPA relationships                               | ✅ Done |
 | 3     | Authentication + JWT + roles                                        | ✅ Done |
 | 4     | Student/Tutor profiles                                              | ✅ Done |
-| 5     | Skills + tutor discovery + search                                   |         |
+| 5     | Skills + tutor discovery + search                                   | ✅ Done |
 | 6     | Availability + slot generation                                      |         |
 | 7     | Concurrency-safe booking                                            |         |
 | 8     | Stripe payments                                                     |         |

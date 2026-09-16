@@ -1,13 +1,15 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Alert } from '../components/ui/Alert'
+import { register, apiErrorMessage } from '../services/auth'
 
 type Role = 'STUDENT' | 'TUTOR'
 
 function Register() {
+  const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -50,12 +52,21 @@ function Register() {
     if (!validate()) return
 
     setSubmitting(true)
-    // Phase 3 will replace this with POST /api/auth/register
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setSubmitting(false)
-    setFormError(
-      'Demo only — registration is coming in Phase 3. Try again later.',
-    )
+    try {
+      await register({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        role,
+      })
+      navigate('/', { replace: true })
+    } catch (err) {
+      setFormError(
+        apiErrorMessage(err, 'Unable to create account. Please try again.'),
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const passwordStrength =

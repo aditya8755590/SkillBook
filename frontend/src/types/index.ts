@@ -14,7 +14,14 @@ interface User {
 
 interface AuthResponse {
   token: string
+  tokenType: string
+  expiresIn: number
   user: User
 }
 
-export type { ApiResponse, User, AuthResponse }
+interface ApiError {
+  error?: string
+  message?: string
+}
+
+export type { ApiResponse, User, AuthResponse, ApiError }

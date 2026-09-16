@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { AuthLayout } from '../components/AuthLayout'
 import { Button } from '../components/ui/Button'
 import { Input } from '../components/ui/Input'
 import { Alert } from '../components/ui/Alert'
+import { login, apiErrorMessage } from '../services/auth'
 
 function Login() {
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -32,12 +34,16 @@ function Login() {
     if (!validate()) return
 
     setSubmitting(true)
-    // Phase 3 will replace this with POST /api/auth/login
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    setSubmitting(false)
-    setFormError(
-      'Demo only — authentication is coming in Phase 3. Try again later.',
-    )
+    try {
+      await login({ email: email.trim(), password })
+      navigate('/', { replace: true })
+    } catch (err) {
+      setFormError(
+        apiErrorMessage(err, 'Unable to sign in. Please try again.'),
+      )
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
