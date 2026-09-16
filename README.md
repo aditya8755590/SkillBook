@@ -195,7 +195,7 @@ Full variable reference:
 
 | Variable                           | Used From | Default                                      | Purpose                           |
 | ---------------------------------- | --------- | -------------------------------------------- | --------------------------------- |
-| `DB_URL` | Phase 1 | `jdbc:postgresql://localhost:5433/skillbook` | JDBC connection string |
+| `DB_URL`                           | Phase 1   | `jdbc:postgresql://localhost:5433/skillbook` | JDBC connection string            |
 | `DB_USERNAME`                      | Phase 1   | `postgres`                                   | PostgreSQL user                   |
 | `DB_PASSWORD`                      | Phase 1   | `password`                                   | PostgreSQL password               |
 | `JWT_SECRET`                       | Phase 3   | —                                            | JWT signing secret (min 32 chars) |
@@ -214,11 +214,33 @@ mvn spring-boot:run
 
 Flyway applies pending migrations, then Tomcat starts on **http://localhost:8080/api**.
 
+> **JWT_SECRET is required.** The backend fails fast at startup if `JWT_SECRET` is missing or under 32 chars. Export it before running:
+> ```bash
+> export JWT_SECRET="$(openssl rand -base64 48)"
+> ```
+
 Verify:
 
 ```bash
 curl http://localhost:8080/api/actuator/health
 # {"status":"UP"}
+```
+
+### Auth API quick test
+
+```bash
+# register (public)
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Alice","email":"alice@example.com","password":"password123","role":"TUTOR"}'
+
+# login (public) -> returns token in data.token
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"alice@example.com","password":"password123"}'
+
+# me (requires Bearer token)
+curl http://localhost:8080/api/auth/me -H "Authorization: Bearer <token>"
 ```
 
 ### 4. Frontend
@@ -319,8 +341,8 @@ lsof -iTCP:8080 -sTCP:LISTEN   # kill the listed PID
 | Phase | Scope                                                               | Status  |
 | ----- | ------------------------------------------------------------------- | ------- |
 | 1     | Project foundation: Spring Boot, PostgreSQL, Flyway, React scaffold | ✅ Done |
-| 2     | Database entities + JPA relationships                               | ⏳ Next |
-| 3     | Authentication + JWT + roles                                        |         |
+| 2     | Database entities + JPA relationships                               | ✅ Done |
+| 3     | Authentication + JWT + roles                                        | ✅ Done |
 | 4     | Student/Tutor profiles                                              |         |
 | 5     | Skills + tutor discovery + search                                   |         |
 | 6     | Availability + slot generation                                      |         |
