@@ -1,6 +1,9 @@
 package com.skillbook.tutor;
 
 import com.skillbook.exception.ResourceNotFoundException;
+import com.skillbook.skill.SkillOffered;
+import com.skillbook.skill.SkillOfferedRepository;
+import com.skillbook.skill.dto.SkillResponse;
 import com.skillbook.tutor.dto.TutorProfileRequest;
 import com.skillbook.tutor.dto.TutorProfileResponse;
 import com.skillbook.user.User;
@@ -9,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -17,6 +22,7 @@ public class TutorProfileService {
 
         private final UserRepository userRepository;
         private final TutorProfileRepository tutorProfileRepository;
+        private final SkillOfferedRepository skillOfferedRepository;
 
         @Transactional
         public TutorProfileResponse upsertProfile(String email, TutorProfileRequest request) {
@@ -54,7 +60,7 @@ public class TutorProfileService {
                         throw new ResourceNotFoundException("TutorProfile", "userId", userId);
                 }
 
-                return TutorProfileResponse.from(user, profile);
+                return TutorProfileResponse.from(user, profile, loadSkills(user.getId()));
         }
 
         @Transactional(readOnly = true)
@@ -67,6 +73,14 @@ public class TutorProfileService {
                         throw new ResourceNotFoundException("TutorProfile", "email", email);
                 }
 
-                return TutorProfileResponse.from(user, profile);
+                return TutorProfileResponse.from(user, profile, loadSkills(user.getId()));
+        }
+
+        private List<SkillResponse> loadSkills(UUID userId) {
+                return skillOfferedRepository.findByTutorIdWithSkill(userId).stream()
+                                .map(SkillOffered::getSkill)
+                                .map(SkillResponse::from)
+                                .sorted(Comparator.comparing(SkillResponse::name))
+                                .toList();
         }
 }

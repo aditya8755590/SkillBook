@@ -1,8 +1,13 @@
 import api from './api'
-import type { ApiError, ApiResponse, AuthResponse, User } from '../types'
+import type { ApiResponse, AuthResponse, User } from '../types'
 
 const TOKEN_KEY = 'accessToken'
 const USER_KEY = 'currentUser'
+
+interface ApiError {
+  error?: string
+  message?: string
+}
 
 export interface RegisterPayload {
   name: string

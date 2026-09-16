@@ -166,6 +166,43 @@ class TutorProfileIntegrationTest {
     }
 
     @Test
+    void getTutorProfileByUserIdIncludesOfferedSkills() throws Exception {
+        String token = registerAndLoginTutor();
+
+        mockMvc.perform(put("/tutors/profile")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "bio": "Java tutor",
+                                  "experienceYears": 6,
+                                  "hourlyRate": 40.00
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/tutors/profile/skills")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "skills": ["Java", "Spring Boot"]
+                                }
+                                """))
+                .andExpect(status().isOk());
+
+        UUID userId = userRepository.findByEmail("alice@example.com").get().getId();
+
+        mockMvc.perform(get("/tutors/" + userId)
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.name").value("Tutor Alice"))
+                .andExpect(jsonPath("$.data.skills.length()").value(2))
+                .andExpect(jsonPath("$.data.skills[0].name").value("Java"))
+                .andExpect(jsonPath("$.data.skills[1].name").value("Spring Boot"));
+    }
+
+    @Test
     void validationRejectsInvalidPayload() throws Exception {
         String token = registerAndLoginTutor();
         String longBio = "x".repeat(2001);
