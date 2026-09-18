@@ -54,8 +54,12 @@ class AvailabilitySlotIntegrationTest {
     @Autowired
     private com.skillbook.booking.BookingRepository bookingRepository;
 
+    @Autowired
+    private com.skillbook.payment.PaymentRepository paymentRepository;
+
     @BeforeEach
     void setUp() {
+        paymentRepository.deleteAll();
         bookingRepository.deleteAll();
         availabilitySlotRepository.deleteAll();
         availabilityRuleRepository.deleteAll();

@@ -47,6 +47,9 @@ class TutorSkillIntegrationTest {
     private com.skillbook.booking.BookingRepository bookingRepository;
 
     @Autowired
+    private com.skillbook.payment.PaymentRepository paymentRepository;
+
+    @Autowired
     private com.skillbook.availability.AvailabilitySlotRepository availabilitySlotRepository;
 
     @Autowired
@@ -54,6 +57,7 @@ class TutorSkillIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        paymentRepository.deleteAll();
         bookingRepository.deleteAll();
         availabilitySlotRepository.deleteAll();
         availabilityRuleRepository.deleteAll();

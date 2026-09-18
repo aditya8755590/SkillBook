@@ -96,6 +96,13 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Stripe (Phase 8 payments) -->
+        <dependency>
+            <groupId>com.stripe</groupId>
+            <artifactId>stripe-java</artifactId>
+            <version>25.12.0</version>
+        </dependency>
+
         <!-- Test -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

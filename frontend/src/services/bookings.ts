@@ -1,5 +1,10 @@
 import api from './api'
-import type { ApiResponse, Booking, BookingCreatePayload } from '../types'
+import type {
+  ApiResponse,
+  Booking,
+  BookingCreatePayload,
+  CheckoutResponse,
+} from '../types'
 
 export async function listMyBookings(): Promise<Booking[]> {
   const { data } = await api.get<ApiResponse<Booking[]>>('/bookings')
@@ -25,6 +30,16 @@ export async function cancelBooking(bookingId: string): Promise<Booking> {
   )
   if (!data.success || !data.data) {
     throw new Error(data.error ?? 'Failed to cancel booking')
+  }
+  return data.data
+}
+
+export async function createCheckout(bookingId: string): Promise<CheckoutResponse> {
+  const { data } = await api.post<ApiResponse<CheckoutResponse>>(
+    `/bookings/${bookingId}/checkout`,
+  )
+  if (!data.success || !data.data) {
+    throw new Error(data.error ?? 'Failed to start payment')
   }
   return data.data
 }

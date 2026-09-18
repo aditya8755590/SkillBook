@@ -1,6 +1,8 @@
 package com.skillbook.exception;
 
 import com.skillbook.common.ApiResponse;
+import com.skillbook.payment.PaymentGatewayException;
+import com.skillbook.payment.PaymentSignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -60,6 +62,20 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleNotFound(ResourceNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(ex.getMessage()));
+    }
+
+    @ExceptionHandler(PaymentSignatureException.class)
+    public ResponseEntity<ApiResponse<Void>> handleInvalidSignature(PaymentSignatureException ex) {
+        log.warn("Rejected webhook with invalid signature");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.error("Invalid webhook signature"));
+    }
+
+    @ExceptionHandler(PaymentGatewayException.class)
+    public ResponseEntity<ApiResponse<Void>> handlePaymentGateway(PaymentGatewayException ex) {
+        log.error("Payment gateway error", ex);
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY)
+                .body(ApiResponse.error("Payment provider is unavailable, please try again later"));
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

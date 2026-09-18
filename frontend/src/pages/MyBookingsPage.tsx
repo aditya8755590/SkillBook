@@ -4,8 +4,12 @@ import { Button } from '../components/ui/Button'
 import { Alert } from '../components/ui/Alert'
 import { Spinner } from '../components/ui/Spinner'
 import { getStoredUser } from '../services/auth'
-import { cancelBooking, listMyBookings } from '../services/bookings'
-import type { Booking } from '../types'
+import {
+  cancelBooking,
+  createCheckout,
+  listMyBookings,
+} from '../services/bookings'
+import type { Booking, PaymentStatus } from '../types'
 
 const STATUS_CLASSES: Record<Booking['status'], string> = {
   CONFIRMED: 'bg-success-bg text-success',
@@ -13,11 +17,33 @@ const STATUS_CLASSES: Record<Booking['status'], string> = {
   COMPLETED: 'bg-primary/10 text-primary',
 }
 
+const PAYMENT_LABELS: Record<PaymentStatus, string> = {
+  PENDING: 'Payment pending',
+  PAID: 'Paid',
+  FAILED: 'Payment failed',
+  REFUNDED: 'Refunded',
+  PARTIALLY_REFUNDED: 'Partially refunded',
+}
+
+const PAYMENT_CLASSES: Record<PaymentStatus, string> = {
+  PENDING: 'text-text-secondary',
+  PAID: 'text-success',
+  FAILED: 'text-danger',
+  REFUNDED: 'text-text-secondary',
+  PARTIALLY_REFUNDED: 'text-text-secondary',
+}
+
 function canCancel(booking: Booking): boolean {
   return (
     booking.status === 'CONFIRMED' &&
     new Date(booking.slot.startAt).getTime() > Date.now()
   )
+}
+
+function canPay(booking: Booking): boolean {
+  if (booking.status !== 'CONFIRMED' || booking.amount <= 0) return false
+  if (!booking.payment) return true
+  return booking.payment.status === 'PENDING' || booking.payment.status === 'FAILED'
 }
 
 function formatMoney(value: number, currency: string): string {
@@ -33,6 +59,7 @@ function MyBookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [loading, setLoading] = useState(true)
   const [cancellingId, setCancellingId] = useState<string | null>(null)
+  const [payingId, setPayingId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const load = useCallback(() => {
@@ -65,6 +92,25 @@ function MyBookingsPage() {
       )
     } finally {
       setCancellingId(null)
+    }
+  }
+
+  const handlePay = async (booking: Booking) => {
+    setPayingId(booking.id)
+    setError('')
+    try {
+      const result = await createCheckout(booking.id)
+      if (result.checkoutUrl) {
+        window.location.assign(result.checkoutUrl)
+      } else {
+        load()
+      }
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : 'Failed to start payment',
+      )
+    } finally {
+      setPayingId(null)
     }
   }
 
@@ -125,6 +171,19 @@ function MyBookingsPage() {
                     <p className="mt-1 text-sm font-semibold text-text">
                       {formatMoney(booking.amount, booking.currency)}
                     </p>
+                    {booking.payment && (
+                      <p
+                        className={`text-xs font-medium ${PAYMENT_CLASSES[booking.payment.status]}`}
+                      >
+                        {PAYMENT_LABELS[booking.payment.status]}
+                        {booking.payment.refundAmount !== null &&
+                          booking.payment.refundAmount > 0 &&
+                          ` – refunded ${formatMoney(
+                            booking.payment.refundAmount,
+                            booking.payment.currency,
+                          )}`}
+                      </p>
+                    )}
                     {booking.message && (
                       <p className="mt-2 text-sm italic text-text-secondary">
                         "{booking.message}"
@@ -144,15 +203,26 @@ function MyBookingsPage() {
                         </p>
                       )}
                   </div>
-                  {canCancel(booking) && (
-                    <Button
-                      variant="secondary"
-                      loading={cancellingId === booking.id}
-                      onClick={() => handleCancel(booking)}
-                    >
-                      Cancel
-                    </Button>
-                  )}
+                  <div className="flex shrink-0 flex-col items-end gap-2">
+                    {canPay(booking) && (
+                      <Button
+                        variant="primary"
+                        loading={payingId === booking.id}
+                        onClick={() => handlePay(booking)}
+                      >
+                        Pay
+                      </Button>
+                    )}
+                    {canCancel(booking) && (
+                      <Button
+                        variant="secondary"
+                        loading={cancellingId === booking.id}
+                        onClick={() => handleCancel(booking)}
+                      >
+                        Cancel
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </li>
             ))}

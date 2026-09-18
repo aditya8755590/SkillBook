@@ -1,6 +1,7 @@
 package com.skillbook.booking.dto;
 
 import com.skillbook.booking.Booking;
+import com.skillbook.payment.dto.PaymentInfo;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -18,9 +19,14 @@ public record BookingResponse(
         String createdAt,
         BookingSlotInfo slot,
         BookingStudentInfo student,
-        BookingTutorInfo tutor
+        BookingTutorInfo tutor,
+        PaymentInfo payment
 ) {
     public static BookingResponse from(Booking booking) {
+        return from(booking, null);
+    }
+
+    public static BookingResponse from(Booking booking, PaymentInfo payment) {
         return new BookingResponse(
                 booking.getId(),
                 booking.getStatus().name(),
@@ -34,7 +40,8 @@ public record BookingResponse(
                 booking.getCreatedAt() != null ? booking.getCreatedAt().toString() : null,
                 BookingSlotInfo.from(booking.getSlot()),
                 BookingStudentInfo.from(booking.getStudent()),
-                BookingTutorInfo.from(booking.getSlot().getTutor())
+                BookingTutorInfo.from(booking.getSlot().getTutor()),
+                payment
         );
     }
 }

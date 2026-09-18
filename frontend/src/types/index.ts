@@ -132,6 +132,27 @@ interface Booking {
   slot: BookingSlotInfo
   student: BookingStudentInfo
   tutor: BookingTutorInfo
+  payment: PaymentInfo | null
+}
+
+type PaymentStatus =
+  | 'PENDING'
+  | 'PAID'
+  | 'FAILED'
+  | 'REFUNDED'
+  | 'PARTIALLY_REFUNDED'
+
+interface PaymentInfo {
+  id: string
+  status: PaymentStatus
+  amount: number
+  currency: string
+  refundAmount: number | null
+}
+
+interface CheckoutResponse {
+  checkoutUrl: string | null
+  status: PaymentStatus
 }
 
 interface BookingCreatePayload {
@@ -157,5 +178,8 @@ export type {
   BookingSlotInfo,
   BookingStudentInfo,
   BookingTutorInfo,
+  PaymentStatus,
+  PaymentInfo,
+  CheckoutResponse,
   BookingCreatePayload,
 }

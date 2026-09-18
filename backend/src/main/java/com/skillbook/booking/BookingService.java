@@ -7,6 +7,7 @@ import com.skillbook.booking.dto.BookingCreateRequest;
 import com.skillbook.booking.dto.BookingResponse;
 import com.skillbook.common.Role;
 import com.skillbook.exception.ResourceNotFoundException;
+import com.skillbook.payment.PaymentService;
 import com.skillbook.tutor.TutorProfile;
 import com.skillbook.tutor.TutorProfileRepository;
 import com.skillbook.user.User;
@@ -35,6 +36,7 @@ public class BookingService {
     private final AvailabilitySlotRepository slotRepository;
     private final TutorProfileRepository tutorProfileRepository;
     private final BookingRepository bookingRepository;
+    private final PaymentService paymentService;
 
     @Transactional
     public BookingResponse createBooking(String email, BookingCreateRequest request) {
@@ -55,14 +57,14 @@ public class BookingService {
         Booking booking = new Booking(student, slot, request.message(), amount);
         booking = bookingRepository.save(booking);
         slot.setStatus(AvailabilitySlotStatus.BOOKED);
-        return BookingResponse.from(booking);
+        return withPayment(booking);
     }
 
     @Transactional(readOnly = true)
     public List<BookingResponse> listMyBookings(String email) {
         User student = findStudentByEmail(email);
         return bookingRepository.findAllByStudentIdOrderByCreatedAtDesc(student.getId()).stream()
-                .map(BookingResponse::from)
+                .map(this::withPayment)
                 .toList();
     }
 
@@ -70,7 +72,7 @@ public class BookingService {
     public BookingResponse getBooking(String email, UUID bookingId) {
         User student = findStudentByEmail(email);
         return bookingRepository.findByIdAndStudentId(bookingId, student.getId())
-                .map(BookingResponse::from)
+                .map(this::withPayment)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking", "id", bookingId));
     }
 
@@ -104,7 +106,8 @@ public class BookingService {
         booking.setCancelledBy(student);
         booking.setStatus(BookingStatus.CANCELLED);
         booking.getSlot().setStatus(AvailabilitySlotStatus.AVAILABLE);
-        return BookingResponse.from(booking);
+        paymentService.refundForCancelIfPaid(booking);
+        return withPayment(booking);
     }
 
     @Transactional
@@ -128,6 +131,13 @@ public class BookingService {
         return profile.getHourlyRate()
                 .multiply(hours)
                 .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private BookingResponse withPayment(Booking booking) {
+        return BookingResponse.from(
+                booking,
+                paymentService.paymentInfoForBooking(booking.getId()).orElse(null)
+        );
     }
 
     private User findStudentByEmail(String email) {
