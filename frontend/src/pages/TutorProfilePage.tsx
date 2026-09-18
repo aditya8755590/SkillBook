@@ -1,17 +1,28 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AppShell } from '../components/AppShell'
 import { Alert } from '../components/ui/Alert'
 import { Spinner } from '../components/ui/Spinner'
 import { Avatar } from '../components/ui/Avatar'
+import { Button } from '../components/ui/Button'
 import { fetchTutorProfile } from '../services/tutors'
-import type { TutorProfile } from '../types'
+import { fetchAvailability } from '../services/availability'
+import { createBooking } from '../services/bookings'
+import { getStoredUser } from '../services/auth'
+import type { AvailabilitySlot, TutorProfile } from '../types'
 
 function TutorProfilePage() {
   const { userId } = useParams<{ userId: string }>()
+  const navigate = useNavigate()
+  const user = getStoredUser()
   const [profile, setProfile] = useState<TutorProfile | null>(null)
+  const [slots, setSlots] = useState<AvailabilitySlot[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [bookingSlotId, setBookingSlotId] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [bookingError, setBookingError] = useState('')
+  const [success, setSuccess] = useState('')
 
   useEffect(() => {
     if (!userId) {
@@ -30,6 +41,44 @@ function TutorProfilePage() {
       })
       .finally(() => setLoading(false))
   }, [userId])
+
+  const isStudentViewer = user?.role === 'STUDENT'
+
+  useEffect(() => {
+    if (!userId || !isStudentViewer) return
+    setLoadingSlots(true)
+    const from = new Date().toISOString()
+    const to = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+    fetchAvailability(userId, from, to)
+      .then(setSlots)
+      .catch(() => setSlots([]))
+      .finally(() => setLoadingSlots(false))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, isStudentViewer])
+
+  const handleBook = async (slot: AvailabilitySlot) => {
+    setBookingSlotId(slot.id)
+    setBookingError('')
+    setSuccess('')
+    try {
+      await createBooking({ slotId: slot.id })
+      setSuccess(`Booked with ${profile?.name ?? 'tutor'} — confirmed.`)
+      setTimeout(() => navigate(`/bookings`), 800)
+    } catch (err) {
+      const status = (err as { response?: { status?: number } }).response?.status
+      setBookingError(
+        status === 409
+          ? 'This slot was just booked — pick another one.'
+          : err instanceof Error
+            ? err.message
+            : 'Booking failed. Please try again.',
+      )
+    } finally {
+      setBookingSlotId(null)
+    }
+  }
+
+  const availableSlots = slots.filter((s) => s.status === 'AVAILABLE')
 
   return (
     <AppShell>
@@ -106,6 +155,63 @@ function TutorProfilePage() {
                 <p className="mt-3 text-sm text-text-secondary/70">
                   No subjects listed yet.
                 </p>
+              )}
+
+              {isStudentViewer && (
+                <>
+                  <h2 className="mt-8 text-lg font-semibold text-text">
+                    Available times
+                  </h2>
+                  {success && <Alert type="success">{success}</Alert>}
+                  {bookingError && (
+                    <Alert type="error">{bookingError}</Alert>
+                  )}
+                  {loadingSlots ? (
+                    <div className="flex justify-center py-10 text-text-secondary">
+                      <Spinner />
+                    </div>
+                  ) : availableSlots.length === 0 ? (
+                    <p className="mt-3 text-sm text-text-secondary/70">
+                      No upcoming availability right now.
+                    </p>
+                  ) : (
+                    <ul className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      {availableSlots.map((slot) => (
+                        <li
+                          key={slot.id}
+                          className="flex items-center justify-between gap-3 rounded-lg border border-border-input bg-surface-input px-4 py-3"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold text-text">
+                              {new Date(slot.startAt).toLocaleDateString([], {
+                                weekday: 'short',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </p>
+                            <p className="text-sm text-text-secondary">
+                              {new Date(slot.startAt).toLocaleTimeString([], {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                              {' – '}
+                              {new Date(slot.endAt).toLocaleTimeString([], {
+                                hour: 'numeric',
+                                minute: '2-digit',
+                              })}
+                            </p>
+                          </div>
+                          <Button
+                            loading={bookingSlotId === slot.id}
+                            onClick={() => handleBook(slot)}
+                          >
+                            Book
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
               )}
             </div>
           </div>

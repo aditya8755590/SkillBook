@@ -39,8 +39,20 @@ class StudentSkillIntegrationTest {
     @Autowired
     private SkillWantedRepository skillWantedRepository;
 
+    @Autowired
+    private com.skillbook.booking.BookingRepository bookingRepository;
+
+    @Autowired
+    private com.skillbook.availability.AvailabilitySlotRepository availabilitySlotRepository;
+
+    @Autowired
+    private com.skillbook.availability.AvailabilityRuleRepository availabilityRuleRepository;
+
     @BeforeEach
     void setUp() {
+        bookingRepository.deleteAll();
+        availabilitySlotRepository.deleteAll();
+        availabilityRuleRepository.deleteAll();
         skillWantedRepository.deleteAll();
         skillOfferedRepository.deleteAll();
         userRepository.deleteAll();

@@ -24,6 +24,9 @@ function AppShell({ children }: { children: ReactNode }) {
               { to: '/tutor/availability', label: 'Availability' },
             ]
           : []),
+        ...(user.role === 'STUDENT'
+          ? [{ to: '/bookings', label: 'My Bookings' }]
+          : []),
       ]
     : []
 

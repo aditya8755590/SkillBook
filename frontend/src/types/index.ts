@@ -102,6 +102,43 @@ interface SlotGenerationResult {
   endDate: string
 }
 
+interface BookingSlotInfo {
+  id: string
+  startAt: string
+  endAt: string
+}
+
+interface BookingStudentInfo {
+  id: string
+  name: string
+}
+
+interface BookingTutorInfo {
+  id: string
+  name: string
+}
+
+interface Booking {
+  id: string
+  status: 'CONFIRMED' | 'CANCELLED' | 'COMPLETED'
+  message: string | null
+  amount: number
+  currency: string
+  refundAmount: number | null
+  cancellationFee: number | null
+  cancelledAt: string | null
+  completedAt: string | null
+  createdAt: string | null
+  slot: BookingSlotInfo
+  student: BookingStudentInfo
+  tutor: BookingTutorInfo
+}
+
+interface BookingCreatePayload {
+  slotId: string
+  message?: string
+}
+
 export type {
   ApiResponse,
   User,
@@ -116,4 +153,9 @@ export type {
   AvailabilityRuleRequest,
   AvailabilitySlot,
   SlotGenerationResult,
+  Booking,
+  BookingSlotInfo,
+  BookingStudentInfo,
+  BookingTutorInfo,
+  BookingCreatePayload,
 }

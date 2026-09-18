@@ -346,7 +346,7 @@ lsof -iTCP:8080 -sTCP:LISTEN   # kill the listed PID
 | 4     | Student/Tutor profiles                                              | ✅ Done |
 | 5     | Skills + tutor discovery + search                                   | ✅ Done |
 | 6     | Availability + slot generation                                      | ✅ Done |
-| 7     | Concurrency-safe booking                                            |         |
+| 7     | Concurrency-safe booking                                            | ✅ Done |
 | 8     | Stripe payments                                                     |         |
 | 9     | Notifications + session lifecycle                                   |         |
 | 10    | WebSocket chat                                                      |         |

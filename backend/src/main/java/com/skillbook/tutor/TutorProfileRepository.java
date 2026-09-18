@@ -7,9 +7,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface TutorProfileRepository extends JpaRepository<TutorProfile, UUID> {
+
+    Optional<TutorProfile> findByUser_Id(UUID userId);
 
     @Query(value = """
             select distinct tp from TutorProfile tp

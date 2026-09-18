@@ -45,8 +45,12 @@ class AvailabilityRuleIntegrationTest {
     @Autowired
     private AvailabilityRuleRepository availabilityRuleRepository;
 
+    @Autowired
+    private com.skillbook.booking.BookingRepository bookingRepository;
+
     @BeforeEach
     void setUp() {
+        bookingRepository.deleteAll();
         availabilitySlotRepository.deleteAll();
         availabilityRuleRepository.deleteAll();
         skillOfferedRepository.deleteAll();

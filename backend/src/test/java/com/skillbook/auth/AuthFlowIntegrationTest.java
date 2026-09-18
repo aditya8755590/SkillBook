@@ -40,6 +40,15 @@ class AuthFlowIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private com.skillbook.booking.BookingRepository bookingRepository;
+
+    @Autowired
+    private com.skillbook.availability.AvailabilitySlotRepository availabilitySlotRepository;
+
+    @Autowired
+    private com.skillbook.availability.AvailabilityRuleRepository availabilityRuleRepository;
+
     private static final String REGISTER_BODY = """
             {
               "name": "Alice Tutor",
@@ -51,6 +60,9 @@ class AuthFlowIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        bookingRepository.deleteAll();
+        availabilitySlotRepository.deleteAll();
+        availabilityRuleRepository.deleteAll();
         userRepository.deleteAll();
     }
 
