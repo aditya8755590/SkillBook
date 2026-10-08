@@ -14,4 +14,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
     Optional<Booking> findByIdAndStudentId(UUID id, UUID studentId);
 
     List<Booking> findByStatusAndSlot_EndAtBefore(BookingStatus status, OffsetDateTime endAtBefore);
+
+    List<Booking> findByStatusAndSlot_StartAtBetweenAndReminderSentAtIsNull(
+            BookingStatus status, OffsetDateTime startAtFrom, OffsetDateTime startAtTo);
 }

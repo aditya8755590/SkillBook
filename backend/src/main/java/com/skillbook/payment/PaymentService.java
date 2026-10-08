@@ -5,6 +5,7 @@ import com.skillbook.booking.BookingRepository;
 import com.skillbook.booking.BookingStatus;
 import com.skillbook.common.Role;
 import com.skillbook.exception.ResourceNotFoundException;
+import com.skillbook.notification.NotificationService;
 import com.skillbook.payment.dto.CheckoutResponse;
 import com.skillbook.payment.dto.PaymentInfo;
 import com.skillbook.user.User;
@@ -33,6 +34,7 @@ public class PaymentService {
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final StripeGateway stripeGateway;
+    private final NotificationService notificationService;
 
     @Value("${stripe.return-url:http://localhost:5173/bookings}")
     private String returnUrl;
@@ -110,6 +112,8 @@ public class PaymentService {
         if (booking.getStatus() != BookingStatus.CONFIRMED) {
             log.info("Booking {} was cancelled while paying; refunding immediately", booking.getId());
             refundForCancelIfPaid(booking);
+        } else {
+            notificationService.notifyPaymentReceived(booking, payment.getAmount());
         }
     }
 
@@ -143,6 +147,7 @@ public class PaymentService {
         payment.setStatus(refundAmount.compareTo(payment.getAmount()) >= 0
                 ? PaymentStatus.REFUNDED
                 : PaymentStatus.PARTIALLY_REFUNDED);
+        notificationService.notifyPaymentRefunded(booking, refundAmount);
     }
 
     public Optional<PaymentInfo> paymentInfoForBooking(UUID bookingId) {

@@ -7,6 +7,7 @@ import com.skillbook.booking.dto.BookingCreateRequest;
 import com.skillbook.booking.dto.BookingResponse;
 import com.skillbook.common.Role;
 import com.skillbook.exception.ResourceNotFoundException;
+import com.skillbook.notification.NotificationService;
 import com.skillbook.payment.PaymentService;
 import com.skillbook.tutor.TutorProfile;
 import com.skillbook.tutor.TutorProfileRepository;
@@ -29,6 +30,7 @@ import java.util.UUID;
 public class BookingService {
 
     private static final int FULL_REFUND_WINDOW_HOURS = 24;
+    private static final int REMINDER_WINDOW_HOURS = 24;
     private static final BigDecimal PARTIAL_FEE_RATE = new BigDecimal("0.50");
     private static final int MINUTES_PER_HOUR = 60;
 
@@ -37,6 +39,7 @@ public class BookingService {
     private final TutorProfileRepository tutorProfileRepository;
     private final BookingRepository bookingRepository;
     private final PaymentService paymentService;
+    private final NotificationService notificationService;
 
     @Transactional
     public BookingResponse createBooking(String email, BookingCreateRequest request) {
@@ -57,6 +60,7 @@ public class BookingService {
         Booking booking = new Booking(student, slot, request.message(), amount);
         booking = bookingRepository.save(booking);
         slot.setStatus(AvailabilitySlotStatus.BOOKED);
+        notificationService.notifyBookingCreated(booking);
         return withPayment(booking);
     }
 
@@ -107,6 +111,7 @@ public class BookingService {
         booking.setStatus(BookingStatus.CANCELLED);
         booking.getSlot().setStatus(AvailabilitySlotStatus.AVAILABLE);
         paymentService.refundForCancelIfPaid(booking);
+        notificationService.notifyBookingCancelled(booking);
         return withPayment(booking);
     }
 
@@ -116,6 +121,22 @@ public class BookingService {
         for (Booking booking : bookingRepository.findByStatusAndSlot_EndAtBefore(BookingStatus.CONFIRMED, now)) {
             booking.setStatus(BookingStatus.COMPLETED);
             booking.setCompletedAt(now);
+            notificationService.notifySessionCompleted(booking);
+        }
+    }
+
+    /**
+     * One-shot reminder for sessions starting within the next 24 hours.
+     * Idempotent via {@code reminder_sent_at} — the column, not the absence
+     * of a notification, decides whether a booking is still due.
+     */
+    @Transactional
+    public void sendSessionReminders() {
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        for (Booking booking : bookingRepository.findByStatusAndSlot_StartAtBetweenAndReminderSentAtIsNull(
+                BookingStatus.CONFIRMED, now, now.plusHours(REMINDER_WINDOW_HOURS))) {
+            booking.setReminderSentAt(now);
+            notificationService.notifySessionReminder(booking);
         }
     }
 

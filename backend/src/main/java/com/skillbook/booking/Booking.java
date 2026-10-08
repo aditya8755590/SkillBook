@@ -65,6 +65,9 @@ public class Booking extends BaseEntity {
     @Column(name = "completed_at")
     private OffsetDateTime completedAt;
 
+    @Column(name = "reminder_sent_at")
+    private OffsetDateTime reminderSentAt;
+
     public Booking(User student, AvailabilitySlot slot, String message, BigDecimal amount) {
         this.student = student;
         this.slot = slot;

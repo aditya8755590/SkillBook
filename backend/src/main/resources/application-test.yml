@@ -25,3 +25,10 @@ stripe:
   secret-key: sk_test_dummy
   webhook-secret: whsec_dummy
   return-url: http://localhost:5173/bookings
+
+mail:
+  enabled: false
+
+app:
+  scheduler:
+    enabled: false

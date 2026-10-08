@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { DarkModeToggle } from './ui/DarkModeToggle'
+import { NotificationBell } from './NotificationBell'
 import { getStoredUser, clearSession } from '../services/auth'
 
 function AppShell({ children }: { children: ReactNode }) {
@@ -66,6 +67,7 @@ function AppShell({ children }: { children: ReactNode }) {
             <DarkModeToggle />
             {user ? (
               <>
+                <NotificationBell />
                 <span className="hidden text-sm font-medium text-text-secondary lg:inline">
                   {user.name}
                 </span>

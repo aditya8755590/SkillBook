@@ -19,6 +19,18 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
 server:
   port: 8080
   servlet:
@@ -32,6 +44,9 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  health:
+    mail:
+      enabled: ${MAIL_HEALTH_ENABLED:false}
 
 logging:
   level:
@@ -46,3 +61,10 @@ stripe:
   secret-key: ${STRIPE_SECRET_KEY:}
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
   return-url: ${STRIPE_RETURN_URL:http://localhost:5173/bookings}
+
+mail:
+  enabled: ${MAIL_ENABLED:false}
+
+app:
+  scheduler:
+    enabled: ${SCHEDULER_ENABLED:true}

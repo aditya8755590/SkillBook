@@ -89,7 +89,7 @@ Core entities (built across phases):
 - **tutor_profiles** — bio, experience, hourly_rate, rating (FK → users)
 - **skills** — normalized skill registry
 - **availability** — weekly (day_of_week) and one-off (date) slots
-- **bookings** — tutor, student, start/end time, status, price
+- **bookings** — tutor, student, start/end time, status, price, reminder_sent_at (Phase 9)
 - **payments** — booking, amount, stripe_payment_id, status
 - **meetings** — booking, start/end, meeting URL
 - **reviews** — student, tutor, booking, rating, comment
@@ -203,6 +203,9 @@ Full variable reference:
 | `STRIPE_SECRET_KEY`                | Phase 8   | —                                            | Stripe test-mode API key          |
 | `STRIPE_WEBHOOK_SECRET`            | Phase 8   | —                                            | Stripe webhook signing secret     |
 | `MAIL_HOST/PORT/USERNAME/PASSWORD` | Phase 9   | —                                            | SMTP credentials                  |
+| `MAIL_ENABLED`                     | Phase 9   | `false`                                      | Actually send SMTP emails         |
+| `MAIL_HEALTH_ENABLED`              | Phase 9   | `false`                                      | Probe SMTP in `/actuator/health`  |
+| `SCHEDULER_ENABLED`                | Phase 9   | `true`                                       | Session completion + reminder jobs |
 
 ### 3. Backend
 
@@ -264,7 +267,7 @@ cd backend
 mvn test
 ```
 
-Current suite: Spring context load, actuator health endpoint, and 5 `GlobalExceptionHandler` unit tests (validation→400, illegal argument→400, conflict→409, not-found→404, generic→500 with no internal details leaked).
+Current suite: **128 tests** — Spring context/actuator smoke, auth/JWT, profiles, skills discovery, availability, concurrency-safe booking, Stripe payments, notifications + session lifecycle (in-memory H2 integration tests), plus unit tests for exception handling, JWT, slot generation, and mail delivery.
 
 ---
 
@@ -348,7 +351,7 @@ lsof -iTCP:8080 -sTCP:LISTEN   # kill the listed PID
 | 6     | Availability + slot generation                                      | ✅ Done |
 | 7     | Concurrency-safe booking                                            | ✅ Done |
 | 8     | Stripe payments (hosted Checkout + webhooks + refunds)             | ✅ Done |
-| 9     | Notifications + session lifecycle                                   |         |
+| 9     | Notifications + session lifecycle                                   | ✅ Done |
 | 10    | WebSocket chat                                                      |         |
 | 11    | WebRTC video sessions                                               |         |
 | 12    | Reviews + tutor reputation                                          |         |

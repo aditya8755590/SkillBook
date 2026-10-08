@@ -160,6 +160,15 @@ interface BookingCreatePayload {
   message?: string
 }
 
+interface AppNotification {
+  id: string
+  type: string
+  message: string
+  read: boolean
+  bookingId: string | null
+  createdAt: string | null
+}
+
 export type {
   ApiResponse,
   User,
@@ -182,4 +191,5 @@ export type {
   PaymentInfo,
   CheckoutResponse,
   BookingCreatePayload,
+  AppNotification,
 }
