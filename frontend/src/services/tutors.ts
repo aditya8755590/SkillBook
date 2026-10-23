@@ -55,12 +55,12 @@ export async function replaceSkills(skillNames: string[]) {
   }
 }
 
-export async function fetchOwnProfile(): Promise<TutorProfile> {
+export async function fetchOwnProfile(): Promise<TutorProfile | null> {
   const { data } = await api.get<ApiResponse<TutorProfile>>('/tutors/profile')
-  if (!data.success || !data.data) {
+  if (!data.success) {
     throw new Error(data.error ?? 'Failed to load profile')
   }
-  return data.data
+  return data.data ?? null
 }
 
 export async function fetchTutorProfile(userId: string): Promise<TutorProfile> {

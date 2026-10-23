@@ -178,6 +178,24 @@ class AvailabilityRuleIntegrationTest {
     }
 
     @Test
+    void duplicateRuleWithinRequestRejectedAsBadRequest() throws Exception {
+        String token = registerAndLoginTutor();
+
+        mockMvc.perform(put("/tutors/availability/rules")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "rules": [
+                                    { "dayOfWeek": 1, "startTime": "09:00", "endTime": "10:00", "timezone": "UTC" },
+                                    { "dayOfWeek": 1, "startTime": "09:00", "endTime": "11:00", "timezone": "UTC" }
+                                  ]
+                                }
+                                """))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     void invalidDayOfWeekRejected() throws Exception {
         String token = registerAndLoginTutor();
 

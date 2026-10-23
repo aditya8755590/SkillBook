@@ -20,9 +20,11 @@ function TutorSetup() {
   useEffect(() => {
     fetchOwnProfile()
       .then((profile) => {
-        setBio(profile.bio ?? '')
-        setExperienceYears(profile.experienceYears?.toString() ?? '')
-        setHourlyRate(profile.hourlyRate?.toString() ?? '')
+        if (profile) {
+          setBio(profile.bio ?? '')
+          setExperienceYears(profile.experienceYears?.toString() ?? '')
+          setHourlyRate(profile.hourlyRate?.toString() ?? '')
+        }
       })
       .catch((err) => {
         if (!isAxiosError(err) || err.response?.status !== 404) {

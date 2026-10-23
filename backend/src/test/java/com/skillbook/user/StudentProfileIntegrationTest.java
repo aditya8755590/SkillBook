@@ -44,12 +44,16 @@ class StudentProfileIntegrationTest {
     @Autowired
     private com.skillbook.availability.AvailabilityRuleRepository availabilityRuleRepository;
 
+    @Autowired
+    private com.skillbook.skill.SkillOfferedRepository skillOfferedRepository;
+
     @BeforeEach
     void setUp() {
         paymentRepository.deleteAll();
         bookingRepository.deleteAll();
         availabilitySlotRepository.deleteAll();
         availabilityRuleRepository.deleteAll();
+        skillOfferedRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -126,6 +130,16 @@ class StudentProfileIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.bio").value("Computer science undergrad"));
+    }
+
+    @Test
+    void ownProfileWithoutExistingReturnsOkWithNoData() throws Exception {
+        String token = registerAndLoginStudent();
+
+        mockMvc.perform(get("/students/profile")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
     }
 
     @Test

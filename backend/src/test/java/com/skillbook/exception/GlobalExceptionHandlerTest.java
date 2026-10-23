@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.List;
 import java.util.Map;
@@ -73,6 +75,30 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getStatusCode().value()).isEqualTo(404);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getError()).isEqualTo("User not found");
+    }
+
+    @Test
+    void unreadableBodyReturns400() {
+        HttpMessageNotReadableException ex = mock(HttpMessageNotReadableException.class);
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleUnreadableBody(ex);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getError())
+                .isEqualTo("Request body is missing or malformed");
+        assertThat(response.getBody().isSuccess()).isFalse();
+    }
+
+    @Test
+    void typeMismatchReturns400() {
+        MethodArgumentTypeMismatchException ex = mock(MethodArgumentTypeMismatchException.class);
+
+        ResponseEntity<ApiResponse<Void>> response = handler.handleTypeMismatch(ex);
+
+        assertThat(response.getStatusCode().value()).isEqualTo(400);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getError()).isEqualTo("Invalid parameter value");
     }
 
     @Test

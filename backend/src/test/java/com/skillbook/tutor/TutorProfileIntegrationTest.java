@@ -48,12 +48,16 @@ class TutorProfileIntegrationTest {
     @Autowired
     private com.skillbook.availability.AvailabilityRuleRepository availabilityRuleRepository;
 
+    @Autowired
+    private com.skillbook.skill.SkillOfferedRepository skillOfferedRepository;
+
     @BeforeEach
     void setUp() {
         paymentRepository.deleteAll();
         bookingRepository.deleteAll();
         availabilitySlotRepository.deleteAll();
         availabilityRuleRepository.deleteAll();
+        skillOfferedRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -108,6 +112,16 @@ class TutorProfileIntegrationTest {
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.bio").value("Experienced math tutor"));
+    }
+
+    @Test
+    void ownProfileWithoutExistingReturnsOkWithNoData() throws Exception {
+        String token = registerAndLoginTutor();
+
+        mockMvc.perform(get("/tutors/profile")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data").doesNotExist());
     }
 
     @Test

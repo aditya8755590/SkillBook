@@ -46,7 +46,7 @@ public class StudentProfileService {
 
                 StudentProfile profile = user.getStudentProfile();
                 if (profile == null) {
-                        throw new ResourceNotFoundException("StudentProfile", "email", email);
+                        return null;
                 }
 
                 return StudentProfileResponse.from(user, profile);

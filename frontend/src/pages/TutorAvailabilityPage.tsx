@@ -116,6 +116,20 @@ function TutorAvailabilityPage() {
       if (invalid) {
         throw new Error('Each rule needs a valid start and end time')
       }
+      const seen = new Set<string>()
+      const duplicate = rules.find((r) => {
+        const key = `${r.dayOfWeek}:${r.startTime}`
+        if (seen.has(key)) return true
+        seen.add(key)
+        return false
+      })
+      if (duplicate) {
+        throw new Error(
+          `Duplicate rule on ${dayName(duplicate.dayOfWeek)} at ${formatRuleTime(
+            duplicate.startTime,
+          )} — pick a different start time`,
+        )
+      }
       await replaceRules(rules)
       setSuccess('Weekly availability saved.')
     } catch (err) {

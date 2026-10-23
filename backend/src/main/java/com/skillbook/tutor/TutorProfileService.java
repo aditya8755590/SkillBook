@@ -70,7 +70,7 @@ public class TutorProfileService {
 
                 TutorProfile profile = user.getTutorProfile();
                 if (profile == null) {
-                        throw new ResourceNotFoundException("TutorProfile", "email", email);
+                        return null;
                 }
 
                 return TutorProfileResponse.from(user, profile, loadSkills(user.getId()));

@@ -1,0 +1,80 @@
+===============================================================================
+ SkillBook API Endpoints
+ Base URL: http://localhost:8080/api   (production: <host>/api)
+ All requests except those marked "Public" require the header:
+   Authorization: Bearer <token>
+ Roles: STUDENT, TUTOR, ADMIN
+===============================================================================
+
+AUTH
+----
+POST   /auth/register                 Public      Create account (name, email, password, role)
+POST   /auth/login                    Public      Login -> returns JWT token + user
+GET    /auth/me                       Authenticated  Get current user from token
+
+STUDENTS
+--------
+PUT    /students/profile              STUDENT     Upsert own student profile
+GET    /students/profile              STUDENT     Get own student profile
+PUT    /students/profile/skills       STUDENT     Upsert student skill interests
+GET    /students/profile/skills       STUDENT     Get own skill interests
+
+TUTORS (profile)
+----------------
+PUT    /tutors/profile                TUTOR       Upsert own tutor profile
+GET    /tutors/profile                Authenticated  Get own tutor profile
+GET    /tutors/{userId}               Public      Get a public tutor profile
+PUT    /tutors/profile/skills         TUTOR       Upsert tutor skills
+GET    /tutors/profile/skills         TUTOR       Get own tutor skills
+
+TUTOR DISCOVERY / SEARCH
+------------------------
+GET    /tutors?skill=&page=&size=     Public      Search/filter tutors (optionally by skill)
+
+SKILLS
+------
+GET    /skills                        Public      List registry of skills
+POST   /skills                        Authenticated  Add a new skill to the registry
+
+AVAILABILITY
+------------
+PUT    /tutors/availability/rules     TUTOR       Create/replace weekly availability rules
+GET    /tutors/availability/rules     TUTOR       Get own availability rules
+POST   /tutors/availability/slots     TUTOR       Manually add a one-off slot
+DELETE /tutors/availability/slots/{slotId}  TUTOR  Delete a slot
+POST   /tutors/availability/generate  TUTOR       Generate future slots from rules
+GET    /tutors/{userId}/availability  Public      Get a tutor's bookable slots
+
+BOOKINGS
+--------
+POST   /bookings                      STUDENT     Request/book a slot (message optional)
+GET    /bookings                      STUDENT     List own bookings (with payment info)
+GET    /bookings/{bookingId}          STUDENT     Get one of own bookings
+POST   /bookings/{bookingId}/cancel   STUDENT     Cancel a booking (refund policy applies)
+
+PAYMENTS (Stripe)
+-----------------
+POST   /bookings/{bookingId}/checkout STUDENT     Create Stripe Checkout session for booking
+POST   /payment/webhook               Public*     Stripe webhook (signature verified)
+                                                 *not JWT; verified via Stripe webhook secret
+
+NOTIFICATIONS
+-------------
+GET    /notifications                 Authenticated  List own notifications (newest first)
+GET    /notifications/unread-count    Authenticated  Number of unread notifications
+POST   /notifications/{id}/read       Authenticated  Mark one notification as read
+POST   /notifications/read-all        Authenticated  Mark all own notifications as read
+                               (Returns updated unread count; cross-user IDs -> 404)
+
+OPERATIONAL
+-----------
+GET    /actuator/health               Public      Health status (adds mail probe if MAIL_HEALTH_ENABLED)
+GET    /actuator/info                 Public      Build info
+
+===============================================================================
+ Notes
+ - /payment/webhook is public but validates the Stripe signature (malformed -> 401).
+ - Tutor/student profile skills and availability rules are scoped to the
+   authenticated user; other users' data is never returned.
+ - Free sessions (amount = 0) skip Stripe and are immediately PAID.
+===============================================================================

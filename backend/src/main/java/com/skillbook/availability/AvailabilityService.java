@@ -40,6 +40,15 @@ public class AvailabilityService {
         ruleRepository.deleteByTutorId(user.getId());
         ruleRepository.flush();
 
+        long distinctRules = request.rules().stream()
+                .map(r -> r.dayOfWeek() + ":" + r.startTime())
+                .distinct()
+                .count();
+        if (distinctRules != request.rules().size()) {
+                throw new IllegalArgumentException(
+                        "Duplicate rule: the same day and start time cannot be saved twice");
+        }
+
         List<AvailabilityRule> saved = request.rules().stream()
                 .map(r -> {
                     DayOfWeek dow = DayOfWeek.of(r.dayOfWeek());
